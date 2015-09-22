@@ -18,8 +18,20 @@ class ViewController: UIViewController {
         let imageLayer3: UIImage = UIImage.init(named: "Interstellar_Layer3")!
         let imageLayer4: UIImage = UIImage.init(named: "Interstellar_Layer4")!
         let imageLayer5: UIImage = UIImage.init(named: "Interstellar_Layer5")!
-        
         let parrallaxImageView = RMParrallaxImageView(images: [imageLayer1, imageLayer2, imageLayer3, imageLayer4, imageLayer5])
+        
+//        let imageLayer1: UIImage = UIImage.init(named: "Avengers_Layer1")!
+//        let imageLayer2: UIImage = UIImage.init(named: "Avengers_Layer2")!
+//        let imageLayer3: UIImage = UIImage.init(named: "Avengers_Layer3")!
+//        let parrallaxImageView = RMParrallaxImageView(images: [imageLayer1, imageLayer2, imageLayer3])
+        
+//        let imageLayer1: UIImage = UIImage.init(named: "Skyfall_1")!
+//        let imageLayer2: UIImage = UIImage.init(named: "Skyfall_2")!
+//        let imageLayer3: UIImage = UIImage.init(named: "Skyfall_3")!
+//        let imageLayer4: UIImage = UIImage.init(named: "Skyfall_4")!
+//        let imageLayer5: UIImage = UIImage.init(named: "Skyfall_5")!
+//        let parrallaxImageView = RMParrallaxImageView(images: [imageLayer1, imageLayer2, imageLayer3, imageLayer4, imageLayer5])
+        
         parrallaxImageView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(parrallaxImageView)
         
