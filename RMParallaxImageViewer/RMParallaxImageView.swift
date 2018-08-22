@@ -10,114 +10,113 @@ import UIKit
 
 class RMParrallaxImageView: UIView {
     
-    private var effectIsActive = false
-    private var imageArray: [UIImage] = []
-    private var motionEffectGroups: NSMutableArray = NSMutableArray()
-    private var effectOffImageConstraints: NSArray = []
-    private var effectOnImageConstraints: NSArray = []
-    private let containerView = UIView.init()
+    fileprivate var effectIsActive = false
+    fileprivate var imageArray = [UIImage]()
+    fileprivate var motionEffectGroups = [UIMotionEffectGroup]()
+    fileprivate var effectOffImageConstraints = [NSLayoutConstraint]()
+    fileprivate var effectOnImageConstraints = [NSLayoutConstraint]()
+    fileprivate let containerView = UIView()
     
     init(lsr: AnyObject) {
-        super.init(frame: CGRectZero)
+        super.init(frame: CGRect.zero)
         setupImages()
     }
     
     init(images imageArray: [UIImage]) {
-        super.init(frame: CGRectZero)
+        super.init(frame: CGRect.zero)
         self.imageArray = imageArray
+        self.backgroundColor = .white
         setupImages()
-        self.backgroundColor = UIColor.whiteColor()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
-    private func setupImages() {
+    fileprivate func setupImages() {
         self.clipsToBounds = true
         
         containerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.clipsToBounds = true
         self.addSubview(containerView)
 
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: Selector("toggleEffect:"))
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(RMParrallaxImageView.toggleEffect(_:)))
         containerView.addGestureRecognizer(tapGestureRecognizer)
         
-        let views = ["containerView" : self.containerView]
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[containerView]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views))
-        self.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[containerView]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views))
+        let constraints = [containerView.topAnchor.constraint(equalTo: topAnchor),
+                           containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                           containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                           containerView.trailingAnchor.constraint(equalTo: trailingAnchor)]
+        NSLayoutConstraint.activate(constraints)
         
-        let effectOffArray = NSMutableArray()
-        let effectOnArray = NSMutableArray()
+        var effectOffArray = [NSLayoutConstraint]()
+        var effectOnArray = [NSLayoutConstraint]()
         
-        for var i = 0; i < self.imageArray.count; i++ {
-            let imageView: UIImageView = UIImageView.init(image: self.imageArray[i])
+        for (index, image) in self.imageArray.enumerated() {
+            let imageView: UIImageView = UIImageView(image: image)
             imageView.translatesAutoresizingMaskIntoConstraints = false
-            imageView.contentMode = .ScaleAspectFill
+            imageView.contentMode = .scaleAspectFill
             self.containerView.addSubview(imageView)
             
-            self.containerView.addConstraint(NSLayoutConstraint.init(item: imageView, attribute: .CenterX, relatedBy: .Equal, toItem: containerView, attribute: .CenterX, multiplier: 1.0, constant: 0))
-            self.containerView.addConstraint(NSLayoutConstraint.init(item: imageView, attribute: .CenterY, relatedBy: .Equal, toItem: containerView, attribute: .CenterY, multiplier: 1.0, constant: 0))
+            self.containerView.addConstraint(NSLayoutConstraint.init(item: imageView, attribute: .centerX, relatedBy: .equal, toItem: containerView, attribute: .centerX, multiplier: 1.0, constant: 0))
+            self.containerView.addConstraint(NSLayoutConstraint.init(item: imageView, attribute: .centerY, relatedBy: .equal, toItem: containerView, attribute: .centerY, multiplier: 1.0, constant: 0))
             
-            let heightLayoutConstraint = NSLayoutConstraint.init(item: imageView, attribute: .Height, relatedBy: .Equal, toItem: containerView, attribute: .Height, multiplier: 1.0, constant: 0)
-            let widthLayoutConstraint = NSLayoutConstraint.init(item: imageView, attribute: .Width, relatedBy: .Equal, toItem: containerView, attribute: .Width, multiplier: 1.0, constant: 0)
-            effectOffArray.addObjectsFromArray([heightLayoutConstraint, widthLayoutConstraint]);
+            let heightLayoutConstraint = NSLayoutConstraint.init(item: imageView, attribute: .height, relatedBy: .equal, toItem: containerView, attribute: .height, multiplier: 1.0, constant: 0)
+            let widthLayoutConstraint = NSLayoutConstraint.init(item: imageView, attribute: .width, relatedBy: .equal, toItem: containerView, attribute: .width, multiplier: 1.0, constant: 0)
+            effectOffArray.append(contentsOf: [heightLayoutConstraint, widthLayoutConstraint])
             
-            let constant: CGFloat = CGFloat(i) * 10;
+            let constant: CGFloat = CGFloat(index) * 10;
             print(constant)
-            let heightLayoutConstraintWithEffect = NSLayoutConstraint.init(item: imageView, attribute: .Height, relatedBy: .Equal, toItem: containerView, attribute: .Height, multiplier: 1.0, constant: constant)
-            let widthLayoutConstraintWithEffect = NSLayoutConstraint.init(item: imageView, attribute: .Width, relatedBy: .Equal, toItem: containerView, attribute: .Width, multiplier: 1.0, constant: constant)
-            effectOnArray.addObjectsFromArray([heightLayoutConstraintWithEffect, widthLayoutConstraintWithEffect]);
+            let heightLayoutConstraintWithEffect = NSLayoutConstraint.init(item: imageView, attribute: .height, relatedBy: .equal, toItem: containerView, attribute: .height, multiplier: 1.0, constant: constant)
+            let widthLayoutConstraintWithEffect = NSLayoutConstraint.init(item: imageView, attribute: .width, relatedBy: .equal, toItem: containerView, attribute: .width, multiplier: 1.0, constant: constant)
+            effectOnArray.append(contentsOf: [heightLayoutConstraintWithEffect, widthLayoutConstraintWithEffect])
             
             // Prepare motion effects
             
             let effect: CGFloat = constant * 2;
             
             let verticalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.y",
-                type: .TiltAlongVerticalAxis)
+                type: .tiltAlongVerticalAxis)
             verticalMotionEffect.minimumRelativeValue = -effect
             verticalMotionEffect.maximumRelativeValue = effect
             
             // Set horizontal effect
             let horizontalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.x",
-                type: .TiltAlongHorizontalAxis)
+                type: .tiltAlongHorizontalAxis)
             horizontalMotionEffect.minimumRelativeValue = -effect
             horizontalMotionEffect.maximumRelativeValue = effect
             
             let motionEffectGroup = UIMotionEffectGroup()
             motionEffectGroup.motionEffects = [horizontalMotionEffect, verticalMotionEffect]
             
-            self.motionEffectGroups.addObject(motionEffectGroup)
-            
-//            // Add both effects to your view
-//            imageView.addMotionEffect(motionEffectGroup)
+            self.motionEffectGroups.append(motionEffectGroup)
         }
         
-        effectOffImageConstraints = effectOffArray as NSArray
-        effectOnImageConstraints = effectOnArray as NSArray
+        effectOffImageConstraints = effectOffArray
+        effectOnImageConstraints = effectOnArray
         
-        NSLayoutConstraint.activateConstraints(effectOffImageConstraints as! [NSLayoutConstraint])
+        NSLayoutConstraint.activate(effectOffImageConstraints)
     }
     
-    func toggleEffect(recognizer: UITapGestureRecognizer) {
-        if (self.effectIsActive) {
-            NSLayoutConstraint.deactivateConstraints(self.effectOnImageConstraints as! [NSLayoutConstraint])
-            NSLayoutConstraint.activateConstraints(self.effectOffImageConstraints as! [NSLayoutConstraint])
+    @objc func toggleEffect(_ recognizer: UITapGestureRecognizer) {
+        if self.effectIsActive {
+            NSLayoutConstraint.deactivate(effectOnImageConstraints)
+            NSLayoutConstraint.activate(effectOffImageConstraints)
         } else {
-            NSLayoutConstraint.deactivateConstraints(self.effectOffImageConstraints as! [NSLayoutConstraint])
-            NSLayoutConstraint.activateConstraints(self.effectOnImageConstraints as! [NSLayoutConstraint])
+            NSLayoutConstraint.deactivate(effectOffImageConstraints)
+            NSLayoutConstraint.activate(effectOnImageConstraints)
         }
         self.effectIsActive = !self.effectIsActive
         self.setNeedsLayout()
-        UIView.animateWithDuration(0.3,
+        UIView.animate(withDuration: 0.3,
             delay: 0,
-            options: .CurveEaseOut,
-            animations: {
+            options: .curveEaseOut,
+            animations: { [weak self] in
+                guard let `self` = self else { return }
                 self.layoutIfNeeded()
-                for var i = 0; i < self.containerView.subviews.count; i++ {
-                    let imageView = self.containerView.subviews[i]
-                    let motionEffect = self.motionEffectGroups[i] as! UIMotionEffectGroup
-                    if (self.effectIsActive) {
+                for (index, imageView) in self.containerView.subviews.enumerated() {
+                    let motionEffect = self.motionEffectGroups[index]
+                    if self.effectIsActive {
                         imageView.addMotionEffect(motionEffect)
                     } else {
                         imageView.removeMotionEffect(motionEffect)
